@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Collections.Concurrent;
 using System.IO;
 
+//clonacion correcta y listo para ser tratado
 namespace UF2Practica1
 {
 	class MainClass
