@@ -28,11 +28,22 @@ namespace UF2Practica1
 			var clock = new Stopwatch();
 			var threads = new List<Thread>();
 			//Recordeu-vos que el fitxer CSV ha d'estar a la carpeta bin/debug de la solució
-			const string fitxer = "CuaClients.csv";
-
+			//const string fitxer = "CuaClients.txt";
+            const string fitxer = "CuaClients.txt";
+            //sino va provar esto directo a la ruta "C:\Users\Portatil\Documents\Eric\clientsEnCua.txt"
+            /*
+            // Llegim l'arxiu de la ruta principal del projecte
+            String currentDirectory = Directory.GetCurrentDirectory();
+            DirectoryInfo currentDirectoryInfo = new DirectoryInfo(currentDirectory);
+            // Tirem dos directori enrere per sortir de bin/debug fins el directori del projecte
+            String ruta = currentDirectoryInfo.Parent.Parent.Parent.FullName;
+            const string fitxer = "CuaClients.csv";
+            ruta = Path.Combine(ruta, fitxer);
+             * */
+            
 			try
 			{
-				var reader = new StreamReader(File.OpenRead(@fitxer));
+                var reader = new StreamReader(File.OpenRead(@fitxer));
 
 
 				//Carreguem la llista clients
@@ -59,12 +70,18 @@ namespace UF2Practica1
 
 			// Instanciar les caixeres i afegir el thread creat a la llista de threads
 
+            for (int voltes = 0; voltes < nCaixeres; voltes++){
+                var caixera = new Caixera(voltes);//instanciem una nova caixera amb el constructor que em fet, pasem un id
+                var thread = new Thread(() => caixera.ProcessarCua());//afegim a la cua la caixera recent creada
+
+                thread.Start();
+                threads.Add(thread);
+            }
 
 
-
-			// Procediment per esperar que acabin tots els threads abans d'acabar
-			foreach (Thread thread in threads)
-				thread.Join();
+                // Procediment per esperar que acabin tots els threads abans d'acabar
+                foreach (Thread thread in threads)
+                    thread.Join();
 
 			// Parem el rellotge i mostrem el temps que triga
 			clock.Stop();
@@ -77,19 +94,31 @@ namespace UF2Practica1
 	#region ClassCaixera
 	public class Caixera
 	{
+
+        //constructor creat per poder instancia les caixeres que volguem
+        public Caixera(int id)
+        {
+            idCaixera = id + 1;
+        }
+        //get set
 		public int idCaixera
 		{
 			get;
 			set;
-		}
+		}        
 
-		public void ProcessarCua()
-		{
+		public void ProcessarCua(){
 			// Llegirem la cua extreient l'element
 			// cridem al mètode ProcesarCompra passant-li el client
 
+            Client nouClient = new Client();/*instanciem un client (metode explicit) i el passarem a el bucle que fa 
+            * la logica del proces de compra, cada iteracio instanci un client segons el que tenim al nostre document
+                                             * (mirar bien de enteder) */
 
-
+            while (MainClass.cua.TryDequeue(out nouClient))
+            {
+                ProcesarCompra(nouClient);
+            }
 		}
 
 
@@ -119,22 +148,18 @@ namespace UF2Practica1
 
 	#region ClassClient
 
-	public class Client
-	{
-		public string nom
-		{
+	public class Client{
+
+		public string nom{
 			get;
 			set;
 		}
 
 
-		public int carretCompra
-		{
+		public int carretCompra{
 			get;
 			set;
 		}
-
-
 	}
 
 	#endregion
